@@ -18,19 +18,31 @@ function displayFilter() {
 
     var result = "";
 
-    console.log("Frame width: ", frames[0].width);
-    console.log("frame height: ", frames[0].height);
+    // console.log("Frame width: ", frames[0].width);
+    // console.log("frame height: ", frames[0].height);
+    // console.log("length: ", frames[0].data.length)
 
-    for (let i = 0; i < frames[0].width; i++) {
-        for (let j = 0; j < frames[0].width; j++) {
+    let colCount = 0;
+    for (let i = 0; i < frames[0].data.length; i += 4) {
+        colCount++;
+        result += getCharacter(frames[0].data[i]);
 
-            const index = (i * frames[0].width) + j;
-
-            console.log("index: ", index);
-            result += getCharacter(frames[0].data[index]);
+        if (colCount == frames[0].width) {
+            colCount = 0;
+            result += "\n";
         }
-        result += "\n";
     }
+
+    // for (let i = 0; i < frames[0].width; i++) {
+    //     for (let j = 0; j < frames[0].width; j++) {
+
+    //         const index = (i * frames[0].width) + j;
+
+    //         console.log("index: ", index);
+    //         result += getCharacter(frames[0].data[index]);
+    //     }
+    //     result += "\n";
+    // }
 
     codeSection.innerHTML += result;
 
@@ -58,13 +70,13 @@ function timerCallback() {
     this.computeFrame();
     setTimeout(() => {
         this.timerCallback();
-    }, 2); // roughly 60 frames per second
+    }, 16); // roughly 60 frames per second
 }
 
 function doLoad() {
     this.video = document.getElementById("video");
     this.c1 = document.getElementById("canvas");
-    this.ctx1 = this.c1.getContext("2d");
+    this.ctx1 = this.c1.getContext("2d", { willReadFrequently: true});
 
     this.video.addEventListener(
     "play",
@@ -78,24 +90,31 @@ function doLoad() {
 };
 
 function computeFrame() {
-    // var codeSection = document.getElementById("code-section");
-    // codeSection.innerHTML = "";
-
     this.ctx1.drawImage(this.video, 0, 0, this.width, this.height);
     const frame = this.ctx1.getImageData(0, 0, this.width, this.height);
 
+    // frame.data.forEach(element => {
+    //     console.log("element: ", element)
+    // });
+
+    // on divise par 4 car c'est un 1D array de RGBA values
     const l = frame.data.length / 4;
 
     for (let i = 0; i < l; i++) {
-    const grey =
-        (frame.data[i * 4 + 0] +
-        frame.data[i * 4 + 1] +
-        frame.data[i * 4 + 2]) /
-        3;
+        
+        // ici on set les valeurs RGB
+        const grey =
+            (frame.data[i * 4 + 0] +
+            frame.data[i * 4 + 1] +
+            frame.data[i * 4 + 2]) /
+            3;
 
-    frame.data[i * 4 + 0] = grey;
-    frame.data[i * 4 + 1] = grey;
-    frame.data[i * 4 + 2] = grey;
+        frame.data[i * 4 + 0] = grey;
+        frame.data[i * 4 + 1] = grey;
+        frame.data[i * 4 + 2] = grey;
+        
+        // Ici on set la valeur Alpha (rgbA)
+        frame.data[i * 4 + 3] = 255;
     }
 
     frames.push(frame);
@@ -103,6 +122,18 @@ function computeFrame() {
     this.ctx1.putImageData(frame, 0, 0);
     return;
 };
+
+function convertFrameToGrayScale(frame) {
+    // frame.data.forEach(element => {
+    //     console.log("element: ", element)
+    // });
+    // for (let i = 0; i < frame.width; i++) {
+    //     for (let j = 0; j < frame.height; j++) {
+    //         const index = (i * frames[0].width) + j;
+
+    //     }
+    // }
+}
 
 document.onreadystatechange = () => {
     if (document.readyState == 'complete')

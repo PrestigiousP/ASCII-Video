@@ -1,10 +1,17 @@
 code {
+
     margin-top: -1em;
-    font-size: 0.7em;
-    letter-spacing: 0em;
-    line-height: 0.7em;
+    font-size: 0.5em;
+    letter-spacing: 1em;
+    line-height: -1em;
+    padding: 0.5em;
     font-weight: bold;
     color: white;
+}
+
+pre {
+    display: flex;
+    justify-content: center;
 }
 
 .video-section{
